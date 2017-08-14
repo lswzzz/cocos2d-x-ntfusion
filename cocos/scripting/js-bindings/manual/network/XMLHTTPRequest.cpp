@@ -939,6 +939,9 @@ void MinXmlHttpRequest::_notify(JS::HandleObject callback)
             JS::RootedValue fval(cx, OBJECT_TO_JSVAL(callback));
             JS::RootedValue out(cx);
             JS_CallFunctionValue(cx, JS::NullPtr(), fval, JS::HandleValueArray::empty(), &out);
+            if (JS_IsExceptionPending(cx)) {
+                handlePendingException(cx);
+            }
         }
         
     }

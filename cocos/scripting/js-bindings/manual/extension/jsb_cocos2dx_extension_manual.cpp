@@ -923,6 +923,9 @@ void __JSDownloaderDelegator::onError()
             jsval succeed = BOOLEAN_TO_JSVAL(false);
             JS::RootedValue retval(_cx);
             JS_CallFunctionValue(_cx, global, callback, JS::HandleValueArray::fromMarkedLocation(1, &succeed), &retval);
+            if (JS_IsExceptionPending(_cx)) {
+                handlePendingException(_cx);
+            }
         }
         release();
     });
@@ -962,6 +965,9 @@ void __JSDownloaderDelegator::onSuccess(Texture2D *tex)
         {
             JS::RootedValue retval(_cx);
             JS_CallFunctionValue(_cx, global, callback, JS::HandleValueArray::fromMarkedLocation(2, valArr), &retval);
+            if (JS_IsExceptionPending(_cx)) {
+                handlePendingException(_cx);
+            }
         }
         release();
     }//);

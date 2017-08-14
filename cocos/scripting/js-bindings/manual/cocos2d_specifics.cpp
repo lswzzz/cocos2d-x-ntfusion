@@ -709,6 +709,10 @@ static bool js_callFunc(JSContext *cx, uint32_t argc, jsval *vp)
 
                 JS::HandleValueArray callArgs = JS::HandleValueArray::fromMarkedLocation(2, valArr);
                 JS_CallFunctionValue(cx, thisObj, jsvalCallback, callArgs, &retval);
+                
+                if (JS_IsExceptionPending(cx)) {
+                    handlePendingException(cx);
+                }
             }
         });
         
@@ -780,6 +784,10 @@ bool js_cocos2dx_CallFunc_initWithFunction(JSContext *cx, uint32_t argc, jsval *
                 
                 JS::HandleValueArray callArgs = JS::HandleValueArray::fromMarkedLocation(2, valArr);
                 JS_CallFunctionValue(cx, thisObj, jsvalCallback, callArgs, &retval);
+                
+                if (JS_IsExceptionPending(cx)) {
+                    handlePendingException(cx);
+                }
             }
         });
         return true;
@@ -1098,6 +1106,10 @@ void JSScheduleWrapper::scheduleFunc(float dt)
         JS::RootedValue retval(cx);
         JS::RootedObject callbackTarget(cx, getJSCallbackThis().toObjectOrNull());
         JS_CallFunctionValue(cx, callbackTarget, callback, args, &retval);
+        
+        if (JS_IsExceptionPending(cx)) {
+            handlePendingException(cx);
+        }
     }
 }
 
