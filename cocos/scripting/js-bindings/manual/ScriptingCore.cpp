@@ -264,6 +264,10 @@ void ScriptingCore::executeJSFunctionWithThisObj(JS::HandleValue thisObj,
 //            jsval jsRet;
 //            JS_CallFunctionValue(_cx, JSVAL_TO_OBJECT(thisObj), callback, argc, vp, &jsRet);
 //        }
+        
+        if (JS_IsExceptionPending(_cx)) {
+            handlePendingException(_cx);
+        }
     }
 }
 
@@ -515,7 +519,12 @@ void ScriptingCore::string_report(JS::HandleValue val) {
 bool ScriptingCore::evalString(const char *string, JS::MutableHandleValue outVal, const char *filename, JSContext* cx, JS::HandleObject global)
 {
     JSAutoCompartment ac(cx, global);
-    return JS_EvaluateScript(cx, global, string, (unsigned)strlen(string), "ScriptingCore::evalString", 1, outVal);
+    bool ok = JS_EvaluateScript(cx, global, string, (unsigned)strlen(string), "ScriptingCore::evalString", 1, outVal);
+    
+    if (JS_IsExceptionPending(cx)) {
+        handlePendingException(cx);
+    }
+    return ok;
 }
 
 bool ScriptingCore::evalString(const char *string, JS::MutableHandleValue outVal)
@@ -631,6 +640,10 @@ void ScriptingCore::createGlobalContext() {
     for (std::vector<sc_register_sth>::iterator it = registrationList.begin(); it != registrationList.end(); it++) {
         sc_register_sth callback = *it;
         callback(_cx, _global.ref());
+        
+        if (JS_IsExceptionPending(_cx)) {
+            handlePendingException(_cx);
+        }
     }
 }
 
@@ -717,6 +730,9 @@ void ScriptingCore::compileScript(const char *path, JS::HandleObject global, JSC
 #endif
         if (ok) {
             filename_script[fullPath] = script;
+        }
+        if (JS_IsExceptionPending(cx)) {
+            handlePendingException(cx);
         }
     }
     else {
@@ -1362,7 +1378,10 @@ bool ScriptingCore::executeFunctionWithOwner(jsval owner, const char *name, cons
             }            
 
             bRet = JS_CallFunctionName(cx, obj, name, args, retVal);
-
+            
+            if (JS_IsExceptionPending(_cx)) {
+                handlePendingException(_cx);
+            }
         }
     }while(0);
     return bRet;
