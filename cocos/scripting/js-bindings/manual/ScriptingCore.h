@@ -562,6 +562,8 @@ js_type_class_t *jsb_register_class(JSContext *cx, JSClass *jsClass, JS::HandleO
     return p;
 }
 
+void handlePendingException(JSContext *cx);
+
 /** creates two new proxies: one associaged with the nativeObj,
  and another one associated with the JsObj */
 js_proxy_t* jsb_new_proxy(void* nativeObj, JS::HandleObject jsObj);

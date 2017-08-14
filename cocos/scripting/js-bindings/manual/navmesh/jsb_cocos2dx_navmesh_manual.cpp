@@ -69,7 +69,7 @@ static bool jsb_cocos2dx_navmesh_NavMeshAgent_move(JSContext *cx, uint32_t argc,
 
 			bool invokeOk = func->invoke(2, arg, &rval);
 			if (!invokeOk && JS_IsExceptionPending(cx)) {
-				JS_ReportPendingException(cx);
+				handlePendingException(cx);
 			}
 		});
 		return true;

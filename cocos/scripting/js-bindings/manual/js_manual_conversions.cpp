@@ -99,9 +99,14 @@ JSFunctionWrapper::~JSFunctionWrapper()
 
 bool JSFunctionWrapper::invoke(unsigned int argc, jsval *argv, JS::MutableHandleValue rval)
 {
-    JSB_AUTOCOMPARTMENT_WITH_GLOBAL_OBJCET
+    JSContext * cx = ScriptingCore::getInstance()->getGlobalContext();
+    JSAutoCompartment ac(cx, ScriptingCore::getInstance()->getGlobalObject());
     
-    return JS_CallFunctionValue(this->_cx, _jsthis.ref(), _fval.ref(), JS::HandleValueArray::fromMarkedLocation(argc, argv), rval);
+    bool ok = JS_CallFunctionValue(cx, _jsthis.ref(), _fval.ref(), JS::HandleValueArray::fromMarkedLocation(argc, argv), rval);
+    if (JS_IsExceptionPending(cx)) {
+        handlePendingException(cx);
+    }
+    return ok;
 }
 
 static Color3B getColorFromJSObject(JSContext *cx, JS::HandleObject colorObject)

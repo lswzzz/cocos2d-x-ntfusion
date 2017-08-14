@@ -124,9 +124,7 @@ static void cc_closesocket(int fd)
 static void ReportException(JSContext *cx)
 {
     if (JS_IsExceptionPending(cx)) {
-        if (!JS_ReportPendingException(cx)) {
-            JS_ClearPendingException(cx);
-        }
+        handlePendingException(cx);
     }
 }
 
@@ -773,7 +771,9 @@ bool ScriptingCore::runScript(const char *path, JS::HandleObject global, JSConte
         evaluatedOK = JS_ExecuteScript(cx, global, script, &rval);
         if (false == evaluatedOK) {
             cocos2d::log("Evaluating %s failed (evaluatedOK == JS_FALSE)", path);
-            JS_ReportPendingException(cx);
+        }
+        if (JS_IsExceptionPending(cx)) {
+            handlePendingException(cx);
         }
     }
  
@@ -802,7 +802,9 @@ bool ScriptingCore::requireScript(const char *path, JS::HandleObject global, JSC
         if (false == evaluatedOK)
         {
             cocos2d::log("(evaluatedOK == JS_FALSE)");
-            JS_ReportPendingException(cx);
+        }
+        if (JS_IsExceptionPending(cx)) {
+            handlePendingException(cx);
         }
     }
     
@@ -1858,7 +1860,9 @@ void ScriptingCore::enableDebugger(unsigned int port)
         JS::RootedValue outval(_cx);
         bool ok = JS_CallFunctionName(_cx, rootedDebugObj, "_prepareDebugger", JS::HandleValueArray::fromMarkedLocation(1, &argv), &outval);
         if (!ok) {
-            JS_ReportPendingException(_cx);
+            if (JS_IsExceptionPending(_cx)) {
+                handlePendingException(_cx);
+            }
         }
         
         // start bg thread
@@ -1916,6 +1920,27 @@ bool jsb_get_reserved_slot(JSObject *obj, uint32_t idx, jsval& ret)
     ret = JS_GetReservedSlot(obj, idx);
 
     return true;
+}
+
+void handlePendingException(JSContext *cx)
+{
+    JS::RootedValue err(cx);
+    if (JS_GetPendingException(cx, &err) && err.isObject())
+    {
+        JS_ClearPendingException(cx);
+        
+        JS::RootedObject errObj(cx, err.toObjectOrNull());
+        JSErrorReport *report = JS_ErrorFromException(cx, errObj);
+        CCLOGERROR("JS Exception: %s, file: %s, lineno: %u\n", (unsigned char*)report->ucmessage, report->filename, report->lineno);
+        
+        JS::RootedValue stack(cx);
+        if (JS_GetProperty(cx, errObj, "stack", &stack) && stack.isString())
+        {
+            JS::RootedString jsstackStr(cx, stack.toString());
+            char *stackStr = JS_EncodeStringToUTF8(cx, jsstackStr);
+            CCLOGERROR("Stack: %s\n", stackStr);
+        }
+    }
 }
 
 js_proxy_t* jsb_new_proxy(void* nativeObj, JS::HandleObject jsHandle)

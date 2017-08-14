@@ -8,6 +8,7 @@
 
 #include "jsb_opengl_manual.h"
 
+#include "ScriptingCore.h"
 #include "jsfriendapi.h"
 //#include "jsb_config.h"
 #include "js_bindings_core.h"

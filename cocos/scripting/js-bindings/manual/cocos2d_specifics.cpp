@@ -1828,7 +1828,7 @@ bool js_CCScheduler_schedule(JSContext *cx, uint32_t argc, jsval *vp)
                 JS::RootedValue rval(cx);
                 bool invokeOk = func->invoke(1, &largv[0], &rval);
                 if (!invokeOk && JS_IsExceptionPending(cx)) {
-                    JS_ReportPendingException(cx);
+                    handlePendingException(cx);
                 }
             };
             callback = lambda;
@@ -4934,7 +4934,7 @@ bool js_cocos2dx_RenderTexture_saveToFile(JSContext *cx, uint32_t argc, jsval *v
                     JS::RootedValue rval(cx);
                     bool invokeOk = func->invoke(2, largv, &rval);
                     if (!invokeOk && JS_IsExceptionPending(cx)) {
-                        JS_ReportPendingException(cx);
+                        handlePendingException(cx);
                     }
                 };
                 arg3 = lambda;
@@ -5005,7 +5005,7 @@ bool js_cocos2dx_RenderTexture_saveToFile(JSContext *cx, uint32_t argc, jsval *v
                     JS::RootedValue rval(cx);
                     bool invokeOk = func->invoke(2, largv, &rval);
                     if (!invokeOk && JS_IsExceptionPending(cx)) {
-                        JS_ReportPendingException(cx);
+                        handlePendingException(cx);
                     }
                 };
                 arg2 = lambda;
