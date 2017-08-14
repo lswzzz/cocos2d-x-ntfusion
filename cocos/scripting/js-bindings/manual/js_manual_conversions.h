@@ -68,6 +68,7 @@ public:
     ~JSFunctionWrapper();
 
     bool invoke(unsigned int argc, jsval *argv, JS::MutableHandleValue rval);
+    bool invoke(JS::HandleValueArray args, JS::MutableHandleValue rval);
 private:
     JSContext *_cx;
     mozilla::Maybe<JS::PersistentRootedObject> _jsthis;
@@ -314,9 +315,7 @@ jsval ccvector_to_jsval(JSContext* cx, const cocos2d::Vector<T>& v)
 template <class T>
 jsval ccmap_string_key_to_jsval(JSContext* cx, const cocos2d::Map<std::string, T>& v)
 {
-    JS::RootedObject proto(cx);
-    JS::RootedObject parent(cx);
-    JS::RootedObject jsRet(cx, JS_NewObject(cx, NULL, proto, parent));
+    JS::RootedObject jsRet(cx, JS_NewObject(cx, NULL, JS::NullPtr(), JS::NullPtr()));
     
     for (auto iter = v.begin(); iter != v.end(); ++iter)
     {

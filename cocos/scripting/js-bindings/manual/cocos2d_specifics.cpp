@@ -72,7 +72,9 @@ void JSTouchDelegate::removeDelegateForJSObject(JSObject* pJSObj)
 {
     TouchDelegateMap::iterator iter = sTouchDelegateMap.find(pJSObj);
     CCASSERT(iter != sTouchDelegateMap.end(), "pJSObj can't be found in sTouchDelegateMap!");
-    sTouchDelegateMap.erase(pJSObj);
+    if (iter != sTouchDelegateMap.end()) {
+        sTouchDelegateMap.erase(pJSObj);
+    }
 }
 
 void JSTouchDelegate::setJSObject(JS::HandleObject obj)
@@ -688,6 +690,11 @@ static bool js_callFunc(JSContext *cx, uint32_t argc, jsval *vp)
             JS::RootedValue jsvalExtraData(cx, tmpCobj->getJSExtraData());
             
             JS::RootedValue senderVal(cx);
+            if (sender == nullptr)
+            {
+                sender = ret->getTarget();
+            }
+            
             if (sender)
             {
                 js_type_class_t *typeClass = js_get_type_from_native<cocos2d::Node>(sender);
@@ -702,7 +709,6 @@ static bool js_callFunc(JSContext *cx, uint32_t argc, jsval *vp)
             if (!jsvalCallback.isNullOrUndefined())
             {
                 JS::RootedValue retval(cx);
-                
                 jsval valArr[2];
                 valArr[0] = senderVal;
                 valArr[1] = jsvalExtraData;
@@ -1104,11 +1110,14 @@ void JSScheduleWrapper::scheduleFunc(float dt)
     if(!callback.isNullOrUndefined()) {
         JS::HandleValueArray args = JS::HandleValueArray::fromMarkedLocation(1, &data);
         JS::RootedValue retval(cx);
-        JS::RootedObject callbackTarget(cx, getJSCallbackThis().toObjectOrNull());
-        JS_CallFunctionValue(cx, callbackTarget, callback, args, &retval);
-        
-        if (JS_IsExceptionPending(cx)) {
-            handlePendingException(cx);
+        JS::RootedValue targetVal(cx, getJSCallbackThis());
+        if (!targetVal.isNullOrUndefined()) {
+            JS::RootedObject callbackTarget(cx, targetVal.toObjectOrNull());
+            JS_CallFunctionValue(cx, callbackTarget, callback, args, &retval);
+            
+            if (JS_IsExceptionPending(cx)) {
+                handlePendingException(cx);
+            }
         }
     }
 }
@@ -4186,8 +4195,8 @@ bool js_cocos2dx_CCFileUtils_getDataFromFile(JSContext *cx, uint32_t argc, jsval
             }
         } while(false);
         
-        JS_ReportError(cx, "get file(%s) data fails", arg0.c_str());
-        return false;
+        args.rval().set(JSVAL_NULL);
+        return true;
     }
     JS_ReportError(cx, "wrong number of arguments: %d, was expecting %d", argc, 3);
     return false;

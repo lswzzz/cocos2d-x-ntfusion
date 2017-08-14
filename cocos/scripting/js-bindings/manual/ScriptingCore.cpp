@@ -417,9 +417,7 @@ void registerDefaultClasses(JSContext* cx, JS::HandleObject global) {
     //
     // Javascript controller (__jsc__)
     //
-    JS::RootedObject proto(cx);
-    JS::RootedObject parent(cx);
-    JS::RootedObject jsc(cx, JS_NewObject(cx, NULL, proto, parent));
+    JS::RootedObject jsc(cx, JS_NewObject(cx, NULL, JS::NullPtr(), JS::NullPtr()));
     JS::RootedValue jscVal(cx);
     jscVal = OBJECT_TO_JSVAL(jsc);
     JS_SetProperty(cx, global, "__jsc__", jscVal);
@@ -603,14 +601,15 @@ void ScriptingCore::createGlobalContext() {
     
     // Removed from Spidermonkey 19.
     //JS_SetCStringsAreUTF8();
-    _rt = JS_NewRuntime(8L * 1024L * 1024L);
+    _rt = JS_NewRuntime(64L * 1024L * 1024L);
     JS_SetGCParameter(_rt, JSGC_MAX_BYTES, 0xffffffff);
+    JS_SetGCParameter(_rt, JSGCParamKey::JSGC_MODE, JSGC_MODE_INCREMENTAL);
     
     JS_SetTrustedPrincipals(_rt, &shellTrustedPrincipals);
     JS_SetSecurityCallbacks(_rt, &securityCallbacks);
     JS_SetNativeStackQuota(_rt, JSB_MAX_STACK_QUOTA);
     
-    _cx = JS_NewContext(_rt, 8192);
+    _cx = JS_NewContext(_rt, 64 * 1024);
     
     // Removed in Firefox v27
 //    JS_SetOptions(this->_cx, JSOPTION_TYPE_INFERENCE);
@@ -1188,12 +1187,10 @@ int ScriptingCore::handleComponentEvent(void* data)
     else if (action == kComponentOnEnter)
     {
         ret = executeFunctionWithOwner(nodeValue, "onEnter", 1, &dataVal, &retval);
-        resumeSchedulesAndActions(p);
     }
     else if (action == kComponentOnExit)
     {
         ret = executeFunctionWithOwner(nodeValue, "onExit", 1, &dataVal, &retval);
-        pauseSchedulesAndActions(p);
     }
     else if (action == kComponentOnUpdate)
     {
@@ -2170,12 +2167,21 @@ void jsb_ref_finalize(JSFreeOp* fop, JSObject* obj)
 // rebind
 void jsb_ref_rebind(JSContext* cx, JS::HandleObject jsobj, js_proxy_t *proxy, cocos2d::Ref* oldRef, cocos2d::Ref* newRef, const char* debug)
 {
-#if not CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+#if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+    // Release the old reference as it have been retained by jsobj previously,
+    // and the jsobj won't have any chance to release it in the future
+    oldRef->release();
+#else
     JS::RemoveObjectRoot(cx, &proxy->obj);
 #endif
     jsb_remove_proxy(proxy);
 
     // Rebind js obj with new action
     js_proxy_t* newProxy = jsb_new_proxy(newRef, jsobj);
-    jsb_ref_init(cx, &newProxy->obj, newRef, debug);
+    
+#if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+    CC_UNUSED_PARAM(newProxy);
+#else
+    JS::AddNamedObjectRoot(cx, &newProxy->obj, debug);
+#endif
 }

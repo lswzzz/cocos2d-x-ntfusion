@@ -19758,14 +19758,15 @@ bool js_cocos2dx_EventListenerCustom_create(JSContext *cx, uint32_t argc, jsval 
 		        std::shared_ptr<JSFunctionWrapper> func(new JSFunctionWrapper(cx, jstarget, args.get(1)));
 		        auto lambda = [=](cocos2d::EventCustom* larg0) -> void {
 		            JSB_AUTOCOMPARTMENT_WITH_GLOBAL_OBJCET
-		            jsval largv[1];
+                    JS::RootedValue largv(cx);
 		            if (larg0) {
-		            largv[0] = OBJECT_TO_JSVAL(js_get_or_create_jsobject<cocos2d::EventCustom>(cx, (cocos2d::EventCustom*)larg0));
+		            largv.set(OBJECT_TO_JSVAL(js_get_or_create_jsobject<cocos2d::EventCustom>(cx, (cocos2d::EventCustom*)larg0)));
 		        } else {
-		            largv[0] = JSVAL_NULL;
+		            largv.set(JSVAL_NULL);
 		        };
 		            JS::RootedValue rval(cx);
-		            bool succeed = func->invoke(1, &largv[0], &rval);
+                    JS::HandleValueArray largs(largv);
+		            bool succeed = func->invoke(largs, &rval);
 		            if (!succeed && JS_IsExceptionPending(cx)) {
 		                handlePendingException(cx);
 		            }

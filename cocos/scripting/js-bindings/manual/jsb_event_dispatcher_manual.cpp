@@ -40,9 +40,12 @@ bool js_EventListenerTouchOneByOne_create(JSContext *cx, uint32_t argc, jsval *v
             // Not found the method, just return false.
             if (!ok)
                 return false;
-
-            CCASSERT(jsret.isBoolean(), "the return value of onTouchBegan isn't boolean");
-            return jsret.toBoolean();
+            
+            if (jsret.isBoolean()) {
+                return jsret.toBoolean();
+            } else {
+                return false;
+            }
         };
         
         ret->onTouchMoved = [ret](Touch* touch, Event* event) {
@@ -57,7 +60,7 @@ bool js_EventListenerTouchOneByOne_create(JSContext *cx, uint32_t argc, jsval *v
             ScriptingCore::getInstance()->handleTouchEvent(ret, EventTouch::EventCode::CANCELLED, touch, event);
         };
         
-        jsval jsret = OBJECT_TO_JSVAL(js_get_or_create_jsobject<EventListenerTouchOneByOne>(cx, ret));
+        JS::RootedValue jsret(cx, OBJECT_TO_JSVAL(js_get_or_create_jsobject<EventListenerTouchOneByOne>(cx, ret)));
         args.rval().set(jsret);
         return true;
     }
@@ -88,7 +91,7 @@ bool js_EventListenerTouchAllAtOnce_create(JSContext *cx, uint32_t argc, jsval *
             ScriptingCore::getInstance()->handleTouchesEvent(ret, EventTouch::EventCode::CANCELLED, touches, event);
         };
         
-        jsval jsret = OBJECT_TO_JSVAL(js_get_or_create_jsobject<EventListenerTouchAllAtOnce>(cx, ret));
+        JS::RootedValue jsret(cx, OBJECT_TO_JSVAL(js_get_or_create_jsobject<EventListenerTouchAllAtOnce>(cx, ret)));
         args.rval().set(jsret);
         return true;
     }
@@ -119,7 +122,7 @@ bool js_EventListenerMouse_create(JSContext *cx, uint32_t argc, jsval *vp)
             ScriptingCore::getInstance()->handleMouseEvent(ret, EventMouse::MouseEventType::MOUSE_SCROLL, event);
         };
         
-        jsval jsret = OBJECT_TO_JSVAL(js_get_or_create_jsobject<EventListenerMouse>(cx, ret));
+        JS::RootedValue jsret(cx, OBJECT_TO_JSVAL(js_get_or_create_jsobject<EventListenerMouse>(cx, ret)));
         args.rval().set(jsret);
         return true;
     }
@@ -142,7 +145,7 @@ bool js_EventListenerKeyboard_create(JSContext *cx, uint32_t argc, jsval *vp)
             ScriptingCore::getInstance()->handleKeybardEvent(ret, keyCode, false, event);
         };
         
-        jsval jsret = OBJECT_TO_JSVAL(js_get_or_create_jsobject<EventListenerKeyboard>(cx, ret));
+        JS::RootedValue jsret(cx, OBJECT_TO_JSVAL(js_get_or_create_jsobject<EventListenerKeyboard>(cx, ret)));
         args.rval().set(jsret);
         return true;
     }
@@ -160,7 +163,7 @@ bool js_EventListenerFocus_create(JSContext *cx, uint32_t argc, jsval *vp)
             ScriptingCore::getInstance()->handleFocusEvent(ret, widgetLoseFocus, widgetGetFocus);
         };
 
-        jsval jsret = OBJECT_TO_JSVAL(js_get_or_create_jsobject<EventListenerFocus>(cx, ret));
+        JS::RootedValue jsret(cx, OBJECT_TO_JSVAL(js_get_or_create_jsobject<EventListenerFocus>(cx, ret)));
 
         JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         args.rval().set(jsret);
