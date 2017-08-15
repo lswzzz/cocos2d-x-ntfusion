@@ -212,6 +212,11 @@ void RichText::formatText()
                         {
                             elementRenderer = Label::createWithSystemFont(elmtText->_text.c_str(), elmtText->_fontName, elmtText->_fontSize);
                         }
+                        if (elmtText->_outlineEnabled)
+                        {
+                            Label *renderer = (Label*)elementRenderer;
+                            renderer->enableOutline(elmtText->_outlineColor, elmtText->_outlineSize);
+                        }
                         break;
                     }
                     case RichElement::Type::IMAGE:
@@ -251,7 +256,7 @@ void RichText::formatText()
                     case RichElement::Type::TEXT:
                     {
                         RichElementText* elmtText = static_cast<RichElementText*>(element);
-                        handleTextRenderer(elmtText->_text.c_str(), elmtText->_fontName.c_str(), elmtText->_fontSize, elmtText->_color, elmtText->_opacity);
+                        handleTextRenderer(elmtText->_text.c_str(), elmtText->_fontName.c_str(), elmtText->_fontSize, elmtText->_color, elmtText->_opacity, elmtText->_outlineEnabled, elmtText->_outlineColor, elmtText->_outlineSize);
                         break;
                     }
                     case RichElement::Type::IMAGE:
@@ -281,7 +286,7 @@ void RichText::formatText()
     }
 }
     
-void RichText::handleTextRenderer(const std::string& text, const std::string& fontName, float fontSize, const Color3B &color, GLubyte opacity)
+void RichText::handleTextRenderer(const std::string& text, const std::string& fontName, float fontSize, const Color3B &color, GLubyte opacity, bool outlineEnabled, const Color4B &outlineColor, int outlineSize)
 {
     if (text == "\n") {
         addNewLine();
@@ -298,6 +303,7 @@ void RichText::handleTextRenderer(const std::string& text, const std::string& fo
     {
         textRenderer = Label::createWithSystemFont(text, fontName, fontSize);
     }
+    
     float textRendererWidth = textRenderer->getContentSize().width;
     _leftSpaceWidth -= textRendererWidth;
     if (_leftSpaceWidth < 0.0f)
@@ -343,6 +349,10 @@ void RichText::handleTextRenderer(const std::string& text, const std::string& fo
                 }
             }
         }
+        if (outlineEnabled)
+        {
+            textRenderer->enableOutline(outlineColor, outlineSize);
+        }
         
         //The minimum cut length is 1, otherwise will cause the infinite loop.
         if (0 == leftLength) leftLength = 1;
@@ -363,17 +373,25 @@ void RichText::handleTextRenderer(const std::string& text, const std::string& fo
             {
                 leftRenderer->setColor(color);
                 leftRenderer->setOpacity(opacity);
+                if (outlineEnabled)
+                {
+                    leftRenderer->enableOutline(outlineColor, outlineSize);
+                }
                 pushToContainer(leftRenderer);
             }
         }
 
         addNewLine();
-        handleTextRenderer(cutWords.c_str(), fontName, fontSize, color, opacity);
+        handleTextRenderer(cutWords.c_str(), fontName, fontSize, color, opacity, outlineEnabled, outlineColor, outlineSize);
     }
     else
     {
         textRenderer->setColor(color);
         textRenderer->setOpacity(opacity);
+        if (outlineEnabled)
+        {
+            textRenderer->enableOutline(outlineColor, outlineSize);
+        }
         pushToContainer(textRenderer);
     }
 }

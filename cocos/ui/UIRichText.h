@@ -98,7 +98,10 @@ public:
      * @js ctor
      * @lua new
      */
-    RichElementText(){_type = Type::TEXT;};
+    RichElementText(){
+        _type = Type::TEXT;
+        _outlineEnabled = false;
+    };
 
     
     /**
@@ -134,10 +137,20 @@ public:
      * @return RichElementText instance.
      */
     static RichElementText* create(int tag, const Color3B& color, GLubyte opacity, const std::string& text, const std::string& fontName, float fontSize);
+    
+    
+    void enableOutline(const Color4B& color, int size) {
+        _outlineColor = color;
+        _outlineSize = size;
+        _outlineEnabled = true;
+    };
 protected:
     std::string _text;
     std::string _fontName;
     float _fontSize;
+    Color4B _outlineColor;
+    int _outlineSize;
+    bool _outlineEnabled;
     friend class RichText;
     
 };
@@ -362,7 +375,7 @@ protected:
 
     virtual void initRenderer() override;
     void pushToContainer(Node* renderer);
-    void handleTextRenderer(const std::string& text, const std::string& fontName, float fontSize, const Color3B& color, GLubyte opacity);
+    void handleTextRenderer(const std::string& text, const std::string& fontName, float fontSize, const Color3B& color, GLubyte opacity, bool outlineEnabled, const Color4B &outlineColor, int outlineSize);
     void handleImageRenderer(const std::string& fileParh, const Color3B& color, GLubyte opacity);
     void handleCustomRenderer(Node* renderer);
     void formarRenderers();

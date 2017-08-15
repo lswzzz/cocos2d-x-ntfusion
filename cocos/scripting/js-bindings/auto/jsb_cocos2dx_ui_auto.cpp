@@ -12978,6 +12978,29 @@ bool js_cocos2dx_ui_RichElementText_create(JSContext *cx, uint32_t argc, jsval *
     return false;
 }
 
+bool js_cocos2dx_ui_RichElementText_enableOutline(JSContext *cx, uint32_t argc, jsval *vp)
+{
+    JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+    bool ok = true;
+    JS::RootedObject obj(cx, args.thisv().toObjectOrNull());
+    js_proxy_t *proxy = jsb_get_js_proxy(obj);
+    cocos2d::ui::RichElementText* cobj = (cocos2d::ui::RichElementText *)(proxy ? proxy->ptr : NULL);
+    JSB_PRECONDITION2( cobj, cx, false, "js_cocos2dx_ui_RichElementText_enableOutline : Invalid Native Object");
+    if (argc >= 2) {
+        cocos2d::Color4B arg0;
+        int arg1 = 0;
+        ok &= jsval_to_cccolor4b(cx, args.get(0), &arg0);
+        ok &= jsval_to_int32(cx, args.get(1), (int32_t *)&arg1);
+        JSB_PRECONDITION2(ok, cx, false, "js_cocos2dx_ui_RichElementText_enableOutline : Error processing arguments");
+        cobj->enableOutline(arg0, arg1);
+        args.rval().setUndefined();
+        return true;
+    }
+    
+    JS_ReportError(cx, "js_cocos2dx_ui_Text_enableOutline : wrong number of arguments: %d, was expecting %d", argc, 1);
+    return false;
+}
+
 bool js_cocos2dx_ui_RichElementText_constructor(JSContext *cx, uint32_t argc, jsval *vp)
 {
     JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
@@ -13032,6 +13055,7 @@ void js_register_cocos2dx_ui_RichElementText(JSContext *cx, JS::HandleObject glo
     static JSFunctionSpec funcs[] = {
         JS_FN("init", js_cocos2dx_ui_RichElementText_init, 6, JSPROP_PERMANENT | JSPROP_ENUMERATE),
         JS_FN("ctor", js_cocos2dx_ui_RichElementText_ctor, 0, JSPROP_PERMANENT | JSPROP_ENUMERATE),
+        JS_FN("enableOutline", js_cocos2dx_ui_RichElementText_enableOutline, 2, JSPROP_PERMANENT | JSPROP_ENUMERATE),
         JS_FS_END
     };
 
