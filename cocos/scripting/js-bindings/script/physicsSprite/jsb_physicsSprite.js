@@ -115,7 +115,7 @@ cc.PhysicsSprite._create = cc.PhysicsSprite.create;
 cc.PhysicsSprite.create = function (fileName, rect) {
     var sprite;
 
-    if (arguments.length == 0) {
+    if (fileName === undefined) {
         sprite = cc.PhysicsSprite._create();
         return sprite;
     }

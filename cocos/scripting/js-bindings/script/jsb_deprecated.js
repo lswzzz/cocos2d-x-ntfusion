@@ -41,73 +41,73 @@ var cc = cc || {};
     };
 
     // Deprecated member functions
-    cc.Action.prototype.copy = function() {
+    cc.Action.prototype.copy = function(...args) {
         logW("cc.Action.copy", "cc.Action.clone");
-        return cc.Action.prototype.clone.apply(this, arguments);
+        return cc.Action.prototype.clone.apply(this, args);
     };
 
-    cc.Animation.prototype.copy = function() {
+    cc.Animation.prototype.copy = function(...args) {
         logW("cc.Animation.copy", "cc.Animation.clone");
-        return cc.Animation.prototype.clone.apply(this, arguments);
+        return cc.Animation.prototype.clone.apply(this, args);
     };
 
-    cc.Node.prototype.nodeToWorldTransform = function() {
+    cc.Node.prototype.nodeToWorldTransform = function(...args) {
         logW("cc.Node.nodeToWorldTransform", "cc.Node.getNodeToWorldTransform");
-        return cc.Node.prototype.getNodeToWorldTransform.apply(this, arguments);
+        return cc.Node.prototype.getNodeToWorldTransform.apply(this, args);
     };
 
-    cc.Node.prototype.getZOrder = function() {
+    cc.Node.prototype.getZOrder = function(...args) {
         logW("cc.Node.getZOrder", "cc.Node.getLocalZOrder");
-        return cc.Node.prototype.getLocalZOrder.apply(this, arguments);
+        return cc.Node.prototype.getLocalZOrder.apply(this, args);
     };
 
-    cc.Node.prototype.setZOrder = function() {
+    cc.Node.prototype.setZOrder = function(...args) {
         logW("cc.Node.setZOrder", "cc.Node.setLocalZOrder");
-        cc.Node.prototype.setLocalZOrder.apply(this, arguments);
+        cc.Node.prototype.setLocalZOrder.apply(this, args);
     };
 
-    cc.Node.prototype.nodeToParentTransform = function() {
+    cc.Node.prototype.nodeToParentTransform = function(...args) {
         logW("cc.Node.nodeToParentTransform", "cc.Node.getNodeToParentTransform");
-        return cc.Node.prototype.getNodeToParentTransform.apply(this, arguments);
+        return cc.Node.prototype.getNodeToParentTransform.apply(this, args);
     };
 
-    cc.Node.prototype.worldToNodeTransform = function() {
+    cc.Node.prototype.worldToNodeTransform = function(...args) {
         logW("cc.Node.worldToNodeTransform", "cc.Node.getWorldToNodeTransform");
-        return cc.Node.prototype.getWorldToNodeTransform.apply(this, arguments);
+        return cc.Node.prototype.getWorldToNodeTransform.apply(this, args);
     };
 
-    cc.Node.prototype.parentToNodeTransform = function() {
+    cc.Node.prototype.parentToNodeTransform = function(...args) {
         logW("cc.Node.parentToNodeTransform", "cc.Node.getParentToNodeTransform");
-        return cc.Node.prototype.getParentToNodeTransform.apply(this, arguments);
+        return cc.Node.prototype.getParentToNodeTransform.apply(this, args);
     };
     
-    cc.Node.prototype.numberOfRunningActions = function() {
+    cc.Node.prototype.numberOfRunningActions = function(...args) {
         logW("cc.Node.numberOfRunningActions", "cc.Node.getNumberOfRunningActions");
-        return cc.Node.prototype.getNumberOfRunningActions.apply(this, arguments);
+        return cc.Node.prototype.getNumberOfRunningActions.apply(this, args);
     };
 
-    cc.Node.prototype.numberOfRunningActionsInTarget = function() {
+    cc.Node.prototype.numberOfRunningActionsInTarget = function(...args) {
         logW("cc.Node.numberOfRunningActionsInTarget", "cc.Node.getNumberOfRunningActionsInTarget");
-        return cc.Node.prototype.getNumberOfRunningActionsInTarget.apply(this, arguments);
+        return cc.Node.prototype.getNumberOfRunningActionsInTarget.apply(this, args);
     };
 
     cc.Menu.prototype.setHandlerPriority = function() {
         cc.log("cc.Menu.setHandlerPriority was deprecated, 3.0 uses new event dispatcher to dispatch touch event based on draw order, so setHandlerPriority is not needed now.");
     };
 
-    cc.Layer.prototype.setKeypadEnabled = function() {
+    cc.Layer.prototype.setKeypadEnabled = function(...args) {
         logW("cc.Layer.setKeypadEnabled", "cc.Layer.setKeyboardEnabled");
-        return cc.Layer.prototype.setKeyboardEnabled.apply(this, arguments);
+        return cc.Layer.prototype.setKeyboardEnabled.apply(this, args);
     };
 
-    cc.Layer.prototype.isKeypadEnabled = function() {
+    cc.Layer.prototype.isKeypadEnabled = function(...args) {
         logW("cc.Layer.isKeypadEnabled", "cc.Layer.isKeyboardEnabled");
-        return cc.Layer.prototype.isKeyboardEnabled.apply(this, arguments);
+        return cc.Layer.prototype.isKeyboardEnabled.apply(this, args);
     };
 
-    cc.registerTargettedDelegate = function() {
+    cc.registerTargettedDelegate = function(...args) {
         logW("cc.registerTargettedDelegate", "cc.registerTargetedDelegate");
-        return cc.registerTargetedDelegate.apply(this, arguments);
+        return cc.registerTargetedDelegate.apply(this, args);
     };
 
     cc.Touch.prototype.getId = function(){

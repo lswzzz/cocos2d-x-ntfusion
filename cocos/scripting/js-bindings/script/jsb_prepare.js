@@ -64,9 +64,7 @@ cc.each = function (obj, iterator, context) {
  * @param {object} *sources
  * @returns {object}
  */
-cc.extend = function(target) {
-    var sources = arguments.length >= 2 ? Array.prototype.slice.call(arguments, 1) : [];
-
+cc.extend = function(target, ...sources) {
     cc.each(sources, function(src) {
         for(var key in src) {
             if (src.hasOwnProperty(key)) {
@@ -184,38 +182,6 @@ cc.inherits = function (childCtor, parentCtor) {
 //      childCtor[ i ] = parentCtor[ i ];
 //  }
 };
-cc.base = function(me, opt_methodName, var_args) {
-    var caller = arguments.callee.caller;
-    if (caller.superClass_) {
-        // This is a constructor. Call the superclass constructor.
-        ret =  caller.superClass_.constructor.apply( me, Array.prototype.slice.call(arguments, 1));
-        return ret;
-    }
-
-    var args = Array.prototype.slice.call(arguments, 2);
-    var foundCaller = false;
-    for (var ctor = me.constructor;
-        ctor; ctor = ctor.superClass_ && ctor.superClass_.constructor) {
-        if (ctor.prototype[opt_methodName] === caller) {
-            foundCaller = true;
-        } else if (foundCaller) {
-            return ctor.prototype[opt_methodName].apply(me, args);
-        }
-    }
-
-    // If we did not find the caller in the prototype chain,
-    // then one of two things happened:
-    // 1) The caller is an instance method.
-    // 2) This method was not called by the right caller.
-    if (me[opt_methodName] === caller) {
-        return me.constructor.prototype[opt_methodName].apply(me, args);
-    } else {
-        throw Error(
-                    'cc.base called from a method of one name ' +
-                    'to a method of a different name');
-    }
-};
-
 
 var ClassManager = {
     id : (0|(Math.random()*998)),
@@ -251,7 +217,7 @@ cc.Class.extend = function (prop) {
         prototype[name] = typeof prop[name] == "function" &&
             typeof _super[name] == "function" && fnTest.test(prop[name]) ?
             (function (name, fn) {
-                return function () {
+                return function (...args) {
                     var tmp = this._super;
 
                     // Add a new ._super() method that is the same method
@@ -260,7 +226,7 @@ cc.Class.extend = function (prop) {
 
                     // The method only need to be bound temporarily, so we
                     // remove it when we're done executing
-                    var ret = fn.apply(this, arguments);
+                    var ret = fn.apply(this, args);
                     this._super = tmp;
 
                     return ret;
@@ -270,7 +236,7 @@ cc.Class.extend = function (prop) {
     }
 
     // The dummy class constructor
-    function Class() {
+    function Class(...args) {
         if (!initializing) {
             this.__instanceId = ClassManager.getNewInstanceId();
             if (!this.ctor) {
@@ -278,7 +244,7 @@ cc.Class.extend = function (prop) {
                     cc.log("No ctor function found! Please check whether `classes_need_extend` section in `ini` file like which in `tools/tojs/cocos2dx.ini`");
             }
             else {
-                this.ctor.apply(this, arguments);
+                this.ctor.apply(this, args);
             }
         }
     }
@@ -297,7 +263,7 @@ cc.Class.extend = function (prop) {
     Class.prototype.constructor = Class;
 
     // And make this class extendable
-    Class.extend = arguments.callee;
+    Class.extend = cc.Class.extend;
 
     return Class;
 };

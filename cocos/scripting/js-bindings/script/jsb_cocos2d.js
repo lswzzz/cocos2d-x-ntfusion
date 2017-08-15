@@ -979,17 +979,13 @@ cc.SizeZero = function () {
  */
 cc.rect = function(x,y,w,h)
 {
-    var argLen = arguments.length;
-    if (argLen === 0)
+    if (x === undefined)
         return { x: 0, y: 0, width: 0, height: 0 };
-
-    if (argLen === 1)
+    else if (y === undefined)
         return { x: x.x, y: x.y, width: x.width, height: x.height };
-
-    if (argLen === 2)
+    else if (w === undefined)
         return { x: x.x, y: x.y, width: y.width, height: y.height };
-
-    if (argLen === 4)
+    else if (h !== undefined)
         return { x: x, y: y, width: w, height: h };
 
     throw "unknown argument type";
@@ -1337,13 +1333,13 @@ var WindowTimeFun = cc.Class.extend({
  @param {number} delay
  @return {number}
  */
-var setTimeout = function (code, delay) {
+var setTimeout = function (code, delay, ...args) {
     var target = new WindowTimeFun(code);
-    if (arguments.length > 2)
-        target._args = Array.prototype.slice.call(arguments, 2);
+    if (args.length > 0)
+        target._args = args;
     var original = target.fun;
-    target.fun = function () {
-        original.apply(this, arguments);
+    target.fun = function (...iargs) {
+        original.apply(this, iargs);
         clearTimeout(target._intervalId);
     }
     cc.director.getScheduler().schedule(target.fun, target, delay / 1000, 0, 0, false, target._intervalId+"");
@@ -1357,10 +1353,10 @@ var setTimeout = function (code, delay) {
  @param {number} delay
  @return {number}
  */
-var setInterval = function (code, delay) {
+var setInterval = function (code, delay, ...args) {
     var target = new WindowTimeFun(code);
-    if (arguments.length > 2)
-        target._args = Array.prototype.slice.call(arguments, 2);
+    if (args.length > 0)
+        target._args = args;
     cc.director.getScheduler().schedule(target.fun, target, delay / 1000, cc.REPEAT_FOREVER, 0, false, target._intervalId+"");
     _windowTimeFunHash[target._intervalId] = target;
     return target._intervalId;
@@ -2572,11 +2568,11 @@ cc.Layer.prototype.isBaked = function() {return false;};
 //
 cc.RenderTexture.prototype._beginWithClear = cc.RenderTexture.prototype.beginWithClear;
 cc.RenderTexture.prototype.beginWithClear = function(r, g, b, a, depthValue, stencilValue) {
-    arguments[0] /= 255;
-    arguments[1] /= 255;
-    arguments[2] /= 255;
-    arguments[3] /= 255;
-    this._beginWithClear.apply(this, arguments);
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    a /= 255;
+    this._beginWithClear.call(this, r, g, b, a, depthValue, stencilValue);
 };
 
 
@@ -2691,7 +2687,7 @@ _p.schedule = function (callback, target, interval, repeat, delay, paused, key) 
     if(isSelector === false){
         //callback, target, interval, repeat, delay, paused, key
         //callback, target, interval, paused, key
-        if(arguments.length === 4 || arguments.length === 5) {
+        if(repeat !== undefined && (delay === undefined || paused === undefined)) {
             key = delay;
             paused = repeat;
             delay = 0;
@@ -2700,7 +2696,7 @@ _p.schedule = function (callback, target, interval, repeat, delay, paused, key) 
     }else{
         //selector, target, interval, repeat, delay, paused
         //selector, target, interval, paused
-        if(arguments.length === 4){
+        if(repeat !== undefined && delay === undefined){
             paused = repeat;
             repeat = cc.REPEAT_FOREVER;
             delay = 0;
@@ -2778,19 +2774,16 @@ cc.defineGetterSetter(cc.BlendFunc, "ALPHA_NON_PREMULTIPLIED", cc.BlendFunc._alp
 cc.BlendFunc.ADDITIVE;
 cc.defineGetterSetter(cc.BlendFunc, "ADDITIVE", cc.BlendFunc._additive);
 
-cc.GLProgram.prototype.setUniformLocationWithMatrix2fv = function(){
-    var tempArray = Array.prototype.slice.call(arguments);
+cc.GLProgram.prototype.setUniformLocationWithMatrix2fv = function(...tempArray){
     tempArray = Array.prototype.concat.call(tempArray, 2);
     this.setUniformLocationWithMatrixfvUnion.apply(this, tempArray);
 };
 
-cc.GLProgram.prototype.setUniformLocationWithMatrix3fv = function(){
-    var tempArray = Array.prototype.slice.call(arguments);
+cc.GLProgram.prototype.setUniformLocationWithMatrix3fv = function(...tempArray){
     tempArray = Array.prototype.concat.call(tempArray, 3);
     this.setUniformLocationWithMatrixfvUnion.apply(this, tempArray);
 };
-cc.GLProgram.prototype.setUniformLocationWithMatrix4fv = function(){
-    var tempArray = Array.prototype.slice.call(arguments);
+cc.GLProgram.prototype.setUniformLocationWithMatrix4fv = function(...tempArray){
     tempArray = Array.prototype.concat.call(tempArray, 4);
     this.setUniformLocationWithMatrixfvUnion.apply(this, tempArray);
 };

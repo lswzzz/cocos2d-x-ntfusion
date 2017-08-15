@@ -66,7 +66,7 @@ cc.AsyncPool = function(srcObj, limit, iterator, onEnd, target){
         self._onEndTarget = endCbTarget;
     };
 
-    self._handleItem = function(){
+    self._handleItem = function(err, result){
         var self = this;
         if(self._pool.length == 0)
             return;                                                         //return directly if the array's length = 0
@@ -88,8 +88,7 @@ cc.AsyncPool = function(srcObj, limit, iterator, onEnd, target){
                 return
             }
 
-            var arr = Array.prototype.slice.call(arguments, 1);
-            self._results[this.index] = arr[0];
+            self._results[this.index] = result;
             if (self.finishedSize === self.size) {
                 if (self._onEnd)
                     self._onEnd.call(self._onEndTarget, null, self._results);
@@ -157,10 +156,10 @@ cc.async = /** @lends cc.async# */{
         var lastResults = [null];//the array to store the last results
         var asyncPool = new cc.AsyncPool(tasks, 1,
             function (func, index, cb1) {
-                args.push(function (err) {
-                    args = Array.prototype.slice.call(arguments, 1);
-                    if(tasks.length - 1 === index) lastResults = lastResults.concat(args);//while the last task
-                    cb1.apply(null, arguments);
+                args.push(function (err, result) {
+                    if(tasks.length - 1 === index) 
+                        lastResults.push(result);//while the last task
+                    cb1.call(null, err, result);
                 });
                 func.apply(target, args);
             }, function (err) {
@@ -227,11 +226,11 @@ cc.path = /** @lends cc.path# */{
      cc.path.join("a", "b/", "/");//-->"a/b/"
      * @returns {string}
      */
-    join: function () {
-        var l = arguments.length;
+    join: function (...args) {
+        var l = args.length;
         var result = "";
         for (var i = 0; i < l; i++) {
-            result = (result + (result === "" ? "" : "/") + arguments[i]).replace(/(\/|\\\\)$/, "");
+            result = (result + (result === "" ? "" : "/") + args[i]).replace(/(\/|\\\\)$/, "");
         }
         return result;
     },
@@ -389,12 +388,14 @@ cc.loader = {
     
     _jsCache : {},//cache for js
     
-    _getArgs4Js: function (args) {
-        var a0 = args[0], a1 = args[1], a2 = args[2], results = ["", null, null];
+    _getArgs4Js: function (baseDir, jsList, cb) {
+        var a0 = baseDir, a1 = jsList, a2 = cb, results = ["", null, null];
 
-        if (args.length === 1) {
-            results[1] = a0 instanceof Array ? a0 : [a0];
-        } else if (args.length === 2) {
+        if (cb !== undefined) {
+            results[0] = a0 || "";
+            results[1] = a1 instanceof Array ? a1 : [a1];
+            results[2] = a2;
+        } else if (jsList !== undefined) {
             if (typeof a1 === "function") {
                 results[1] = a0 instanceof Array ? a0 : [a0];
                 results[2] = a1;
@@ -402,10 +403,8 @@ cc.loader = {
                 results[0] = a0 || "";
                 results[1] = a1 instanceof Array ? a1 : [a1];
             }
-        } else if (args.length === 3) {
-            results[0] = a0 || "";
-            results[1] = a1 instanceof Array ? a1 : [a1];
-            results[2] = a2;
+        } else if (baseDir !== undefined) {
+            results[1] = a0 instanceof Array ? a0 : [a0];
         } else throw new Error("arguments error to load js!");
         return results;
     },
@@ -421,7 +420,7 @@ cc.loader = {
      */
     loadJs: function (baseDir, jsList, cb) {
         var self = this, localJsCache = self._jsCache,
-            args = self._getArgs4Js(arguments);
+            args = self._getArgs4Js(baseDir, jsList, cb);
         baseDir = args[0];
         jsList = args[1];
         cb = args[2];
@@ -439,7 +438,7 @@ cc.loader = {
      * @param {function} [cb]
      */
     loadJsWithImg : function(baseDir, jsList, cb){
-        this.loadJs.apply(this, arguments);
+        this.loadJs.call(this, baseDir, jsList, cb);
     },
     
     //@MODE_END DEV
@@ -472,8 +471,7 @@ cc.loader = {
      * @returns {Image}
      */
     loadImg: function (url, option, cb){
-        var l = arguments.length;
-        if(l == 2) cb = option;
+        if(cb === undefined) cb = option;
 
         var cachedTex = cc.textureCache.getTextureForKey(url);
         if (cachedTex) {
@@ -592,21 +590,20 @@ cc.loader = {
      */
     load : function(resources, option, loadCallback){
         var self = this;
-        var len = arguments.length;
-        if(len === 0)
+        if(resources === undefined)
             throw new Error("arguments error!");
 
-        if(len === 3){
+        if(loadCallback !== undefined){
             if(typeof option === "function"){
                 if(typeof loadCallback === "function")
                     option = {trigger : option, cb : loadCallback };
                 else
                     option = { cb : option, cbTarget : loadCallback};
             }
-        }else if(len === 2){
+        }else if(option !== undefined){
             if(typeof option === "function")
                 option = {cb : option};
-        }else if(len === 1){
+        }else if(resources !== undefined){
             option = {};
         }
 
@@ -615,11 +612,10 @@ cc.loader = {
         var asyncPool = new cc.AsyncPool(
             resources, 0,
             function (value, index, AsyncPoolCallback, aPool) {
-                self._loadResIterator(value, index, function (err) {
-                    var arr = Array.prototype.slice.call(arguments, 1);
+                self._loadResIterator(value, index, function (err, result) {
                     if (option.trigger)
-                        option.trigger.call(option.triggerTarget, arr[0], aPool.size, aPool.finishedSize);   //call trigger
-                    AsyncPoolCallback(err, arr[0]);
+                        option.trigger.call(option.triggerTarget, result, aPool.size, aPool.finishedSize);   //call trigger
+                    AsyncPoolCallback(err, result);
                 });
             },
             option.cb, option.cbTarget);
@@ -734,8 +730,7 @@ cc.defineGetterSetter(cc.loader, "audioPath", function(){
  *      cc.formatStr(a, b, c);
  * @returns {String}
  */
-cc.formatStr = function(){
-    var args = arguments;
+cc.formatStr = function(...args){
     var l = args.length;
     if(l < 1)
         return "";
@@ -1505,25 +1500,24 @@ cc._initDebugSetting = function (mode) {
     cc.log = cc.warn = cc.error = cc.assert = function(){};
     if(mode == ccGame.DEBUG_MODE_NONE){
     }else{
-        cc.error = function(){
-            bakLog.call(this, "ERROR :  " + cc.formatStr.apply(cc, arguments));
+        cc.error = function(...args){
+            bakLog.call(this, "ERROR :  " + cc.formatStr.apply(cc, args));
         };
-        cc.assert = function(cond, msg) {
+        cc.assert = function(cond, ...args) {
+            var msg = args[0];
             if (!cond && msg) {
                 var args = [];
-                for (var i = 1; i < arguments.length; i++)
-                    args.push(arguments[i]);
                 bakLog("Assert: " + cc.formatStr.apply(cc, args));
             }
         };
         if(mode != ccGame.DEBUG_MODE_ERROR && mode != ccGame.DEBUG_MODE_ERROR_FOR_WEB_PAGE){
-            cc.warn = function(){
-                bakLog.call(this, "WARN :  " + cc.formatStr.apply(cc, arguments));
+            cc.warn = function(...args){
+                bakLog.call(this, "WARN :  " + cc.formatStr.apply(cc, args));
             };
         }
         if(mode == ccGame.DEBUG_MODE_INFO || mode == ccGame.DEBUG_MODE_INFO_FOR_WEB_PAGE){
-            cc.log = function(){
-                bakLog.call(this, cc.formatStr.apply(cc, arguments));
+            cc.log = function(...args){
+                bakLog.call(this, cc.formatStr.apply(cc, args));
             };
         }
     }

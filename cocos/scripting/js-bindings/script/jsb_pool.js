@@ -115,12 +115,10 @@ cc.pool = /** @lends cc.pool# */{
      * @param args
      * @returns {*} call the reuse function an return the obj
      */
-    getFromPool: function (objClass/*,args*/) {
+    getFromPool: function (objClass, ...args) {
         if (this.hasObject(objClass)) {
             var pid = objClass.prototype.__pid;
             var list = this._pool[pid];
-            var args = Array.prototype.slice.call(arguments);
-            args.shift();
             var obj = list.pop();
             // User implementation for re-enable the object
             obj.reuse && obj.reuse.apply(obj, args);

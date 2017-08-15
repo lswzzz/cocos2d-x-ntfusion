@@ -61,12 +61,13 @@ _p._ctor = function(start, end, v, colorStops) {
 
 
 _p = cc.LayerMultiplex.prototype;
-_p._ctor = function(layers) {
+_p._ctor = function(...args) {
+    var layers = args[0];
     if(layers != undefined){
         if (layers instanceof Array)
             cc.LayerMultiplex.prototype.initWithArray.call(this, layers);
         else
-            cc.LayerMultiplex.prototype.initWithArray.call(this, Array.prototype.slice.call(arguments));
+            cc.LayerMultiplex.prototype.initWithArray.call(this, args);
     }else{
         cc.LayerMultiplex.prototype.init.call(this);
     }
@@ -149,24 +150,22 @@ _p._ctor = function(gridSize, texture, flipped){
 /************************  Menu and menu items  *************************/
 
 _p = cc.Menu.prototype;
-_p._ctor = function(menuItems) {
-    if((arguments.length > 0) && (arguments[arguments.length-1] == null))
-        cc.log("parameters should not be ending with null in Javascript");
-
-    var argc = arguments.length,
+_p._ctor = function(...args) {
+    var menuItems = args[0];
+    var argc = args.length,
         items = [];
     if (argc == 1) {
         if (menuItems instanceof Array) {
             items = menuItems;
         }
         else{
-            items.push(arguments[0]);
+            items.push(args[0]);
         }
     }
     else if (argc > 1) {
         for (var i = 0; i < argc; i++) {
-            if (arguments[i])
-                items.push(arguments[i]);
+            if (args[i])
+                items.push(args[i]);
         }
     }
 
@@ -262,24 +261,24 @@ _p._ctor = function(normalImage, selectedImage, three, four, five) {
 };
 
 _p = cc.MenuItemToggle.prototype;
-_p._ctor = function() {
-    var argc =  arguments.length, callback, target;
+_p._ctor = function(...args) {
+    var argc = args.length, callback, target;
     // passing callback.
-    if (typeof arguments[argc-2] === 'function') {
-        callback = arguments[argc-2];
-        target = arguments[argc-1];
+    if (typeof args[argc-2] === 'function') {
+        callback = args[argc-2];
+        target = args[argc-1];
         argc = argc - 2;
-    } else if(typeof arguments[argc-1] === 'function'){
-        callback = arguments[argc-1];
+    } else if(typeof args[argc-1] === 'function'){
+        callback = args[argc-1];
         argc = argc - 1;
     }
 
     if(argc > 0) {
-        this.initWithItem(arguments[0]);
+        this.initWithItem(args[0]);
 
         for (var i = 1; i < argc; i++) {
-            if (arguments[i])
-                this.addSubItem(arguments[i]);
+            if (args[i])
+                this.addSubItem(args[i]);
         }
         if (callback)
             target ? this.setCallback(callback, target) : this.setCallback(callback);
@@ -350,8 +349,8 @@ _p._ctor = function(placeholder, dimensions, alignment, fontName, fontSize){
             this._placeHolder = placeholder;
     }        
     else if(fontName === undefined && alignment !== undefined){
-        fontName = arguments[1];
-        fontSize = arguments[2];
+        fontName = dimensions;
+        fontSize = alignment;
         this.initWithString("", fontName, fontSize);
         if(placeholder)
             this._placeHolder = placeholder;
@@ -565,8 +564,8 @@ cc.ActionInterval.prototype._ctor = function(d) {
     d !== undefined && this.initWithDuration(d);
 };
 
-cc.Sequence.prototype._ctor = function(tempArray) {
-    var paramArray = (tempArray instanceof Array) ? tempArray : Array.prototype.slice.call(arguments);
+cc.Sequence.prototype._ctor = function(...args) {
+    var paramArray = (args[0] instanceof Array) ? args[0] : args;
     var last = paramArray.length - 1;
     if ((last >= 0) && (paramArray[last] == null))
         cc.log("parameters should not be ending with null in Javascript");
@@ -584,8 +583,8 @@ cc.RepeatForever.prototype._ctor = function(action) {
     action !== undefined && this.initWithAction(action);
 };
 
-cc.Spawn.prototype._ctor = function(tempArray) {
-    var paramArray = (tempArray instanceof Array) ? tempArray : Array.prototype.slice.call(arguments);
+cc.Spawn.prototype._ctor = function(...args) {
+    var paramArray = (args[0] instanceof Array) ? args[0] : args;
     var last = paramArray.length - 1;
     if ((last >= 0) && (paramArray[last] == null))
         cc.log("parameters should not be ending with null in Javascript");
@@ -854,7 +853,7 @@ cc.Sprite._create = cc.Sprite.create;
 cc.Sprite.create = function (fileName, rect) {
     var sprite;
     
-    if (arguments.length == 0) {
+    if (fileName === undefined) {
         sprite = cc.Sprite._create();
         return sprite;
     }
@@ -984,18 +983,16 @@ cc.SpriteFrame._create = cc.SpriteFrame.create;
  */
 cc.SpriteFrame.create = function(fileName, rect, rotated, offset, originalSize){
     var spriteFrame = null;
-    switch (arguments.length) {
-        case 2:
-            if (fileName instanceof cc.Texture2D)
-                spriteFrame = cc.SpriteFrame.createWithTexture(fileName, rect);
-            else spriteFrame = cc.SpriteFrame._create(fileName, rect);
-            break;
-        case 5:
-            spriteFrame = cc.SpriteFrame._create(fileName, rect, rotated, offset, originalSize);
-            break;
-        default:
-            throw "Argument must be non-nil ";
-            break;
+    if (originalSize !== undefined) {
+        spriteFrame = cc.SpriteFrame._create(fileName, rect, rotated, offset, originalSize);
+    }
+    else if (rect !== undefined && rotated === undefined) {
+        if (fileName instanceof cc.Texture2D)
+            spriteFrame = cc.SpriteFrame.createWithTexture(fileName, rect);
+        else spriteFrame = cc.SpriteFrame._create(fileName, rect);
+    }
+    else {
+        throw "Argument must be non-nil ";
     }
     return spriteFrame;
 };
@@ -1094,13 +1091,12 @@ cc.MenuItemSprite.create = function (normalSprite, selectedSprite, three, four, 
 cc.MenuItemImage.create = function(normalImage, selectedImage, three, four, five) {
     return new cc.MenuItemImage(normalImage, selectedImage, three, four, five);
 };
-cc.MenuItemToggle.create = function(/* var args */) {
-    var n = arguments.length;
+cc.MenuItemToggle.create = function(...args) {
+    var n = args.length;
 
-    if (typeof arguments[n-2] === 'function' || typeof arguments[n-1] === 'function')   {
-        var args = Array.prototype.slice.call(arguments);
+    if (typeof args[n-2] === 'function' || typeof args[n-1] === 'function')   {
         var obj = null;
-        if( typeof arguments[n-2] === 'function' )
+        if( typeof args[n-2] === 'function' )
             obj = args.pop();
 
         var func = args.pop();
@@ -1115,20 +1111,22 @@ cc.MenuItemToggle.create = function(/* var args */) {
             item.setCallback(func);
         return item;
     } else {
-        return cc.MenuItemToggle._create.apply(this, arguments);
+        return cc.MenuItemToggle._create.apply(this, args);
     }
 };
 
 
 // LabelAtlas
-cc.LabelAtlas.create = function( a,b,c,d,e ) {
-
-    var n = arguments.length;
-
-    if ( n == 5) {
+cc.LabelAtlas.create = function( ...args ) {
+    var a = args[0],
+        b = args[1],
+        c = args[2],
+        d = args[3],
+        e = args[4];
+    if (e !== undefined) {
         return cc.LabelAtlas._create(a,b,c,d,e.charCodeAt(0));
     } else {
-        return cc.LabelAtlas._create.apply(this, arguments);
+        return cc.LabelAtlas._create.apply(this, args);
     }
 };
 
@@ -1163,37 +1161,38 @@ cc.LayerMultiplex.create = cc.LayerMultiplex.createWithArray;
  * var animation2 = cc.Animation.create(animationFrames, 0.2);
  * var animation3 = cc.Animation.create(animationFrames, 0.2, 2);
  */
-cc.Animation.create = function (frames, delay, loops) {
+cc.Animation.create = function (...args) {
+    var frames = args[0];
+    var delay = args[1];
     if(frames === undefined){
         return cc.Animation.createWithAnimationFrames();
     }
     else if(frames[0] && frames[0] instanceof cc.AnimationFrame){
-        return cc.Animation.createWithAnimationFrames.apply(this, arguments);
+        return cc.Animation.createWithAnimationFrames.apply(this, args);
     }
     else if(frames[0] && frames[0] instanceof cc.SpriteFrame){
         delay = delay || 0;
-        return cc.Animation.createWithSpriteFrames.apply(this, arguments);
+        return cc.Animation.createWithSpriteFrames.apply(this, args);
     }
 };
 
-cc.Menu.create = function(menuItems) {
-    if((arguments.length > 0) && (arguments[arguments.length-1] == null))
-        cc.log("parameters should not be ending with null in Javascript");
+cc.Menu.create = function(...args) {
+    var menuItems = args[0];
 
-    var argc = arguments.length,
+    var argc = args.length,
         items = [];
     if (argc == 1) {
         if (menuItems instanceof Array) {
             items = menuItems;
         }
         else{
-            items.push(arguments[0]);
+            items.push(args[0]);
         }
     }
     else if (argc > 1) {
         for (var i = 0; i < argc; i++) {
-            if (arguments[i])
-                items.push(arguments[i]);
+            if (args[i])
+                items.push(args[i]);
         }
     }
     return cc.Menu._create.apply(null, items);
