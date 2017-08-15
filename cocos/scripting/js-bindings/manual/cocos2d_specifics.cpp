@@ -1182,7 +1182,9 @@ bool js_CCNode_unschedule(JSContext *cx, uint32_t argc, jsval *vp)
         Scheduler *sched = node->getScheduler();
         
         auto targetArray = JSScheduleWrapper::getTargetForSchedule(args.get(0));
-        CCLOGINFO("unschedule target number: %d", targetArray->count());
+        if (targetArray != nullptr) {
+            CCLOGINFO("unschedule target number: %d", targetArray->count());
+        }
         Ref* tmp = NULL;
         CCARRAY_FOREACH(targetArray, tmp)
         {
