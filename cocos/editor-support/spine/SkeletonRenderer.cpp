@@ -64,8 +64,13 @@ void SkeletonRenderer::initialize () {
 
 	_blendFunc = BlendFunc::ALPHA_PREMULTIPLIED;
 	setOpacityModifyRGB(true);
-
-	setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP));
+#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+    setGLProgramState(GLProgramState::getPositionTextureColorETCGLProgramState());
+#else
+    setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP));
+#endif
+	
+    
 }
 
 void SkeletonRenderer::setSkeletonData (spSkeletonData *skeletonData, bool ownsSkeletonData) {
@@ -253,7 +258,7 @@ void SkeletonRenderer::draw (Renderer* renderer, const Mat4& transform, uint32_t
 		}
 
 		batch->addCommand(renderer, _globalZOrder, attachmentVertices->_texture->getName(), _glProgramState, blendFunc,
-			*attachmentVertices->_triangles, transform, transformFlags);
+			*attachmentVertices->_triangles, transform, transformFlags, attachmentVertices->_texture->getAlphaName());
 	}
 
 	if (_debugSlots || _debugBones) {

@@ -4862,6 +4862,8 @@
 		B276EF5C1988D1D500CD400F /* CCVertexIndexData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CCVertexIndexData.cpp; sourceTree = "<group>"; };
 		B276EF5D1988D1D500CD400F /* CCVertexIndexBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCVertexIndexBuffer.h; sourceTree = "<group>"; };
 		B276EF5E1988D1D500CD400F /* CCVertexIndexBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CCVertexIndexBuffer.cpp; sourceTree = "<group>"; };
+		B2803B391F51476A0016DCB4 /* ccShader_ETC1AS_PositionTextureColor.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ccShader_ETC1AS_PositionTextureColor.frag; sourceTree = "<group>"; };
+		B2803B3A1F51476A0016DCB4 /* ccShader_ETC1AS_PositionTextureGray.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ccShader_ETC1AS_PositionTextureGray.frag; sourceTree = "<group>"; };
 		B29594AF1926D5D9003EEF37 /* ccShader_3D_Color.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ccShader_3D_Color.frag; sourceTree = "<group>"; };
 		B29594B01926D5D9003EEF37 /* ccShader_3D_ColorTex.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ccShader_3D_ColorTex.frag; sourceTree = "<group>"; };
 		B29594B11926D5D9003EEF37 /* ccShader_3D_PositionTex.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ccShader_3D_PositionTex.vert; sourceTree = "<group>"; };
@@ -7665,6 +7667,8 @@
 		5034CA5D191D591900CE6051 /* shaders */ = {
 			isa = PBXGroup;
 			children = (
+				B2803B391F51476A0016DCB4 /* ccShader_ETC1AS_PositionTextureColor.frag */,
+				B2803B3A1F51476A0016DCB4 /* ccShader_ETC1AS_PositionTextureGray.frag */,
 				B241A6E21AFB0BE700C5623C /* ccShader_CameraClear.frag */,
 				B241A6E31AFB0BE700C5623C /* ccShader_CameraClear.vert */,
 				B603F1B11AC8F1FD00A9579C /* ccShader_3D_Terrain.frag */,

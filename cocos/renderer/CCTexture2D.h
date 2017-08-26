@@ -408,6 +408,11 @@ public:
 
     std::string getPath()const { return _filePath; }
 
+    void setAlphaTexture(Texture2D *pAlpha);
+    Texture2D* getAlphaTexture(){ return _alphaTexture; }
+    GLuint getAlphaName() const;
+    
+    bool isETC1() const { return _isETC1; }
 public:
     /** Get pixel info map, the key-value pairs is PixelFormat and PixelFormatInfo.*/
     static const PixelFormatInfoMap& getPixelFormatInfoMap();
@@ -544,6 +549,9 @@ protected:
 
     bool _valid;
     std::string _filePath;
+    
+    Texture2D* _alphaTexture;
+    bool      _isETC1 = false;
 };
 
 

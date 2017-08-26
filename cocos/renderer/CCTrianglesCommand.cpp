@@ -36,11 +36,12 @@ TrianglesCommand::TrianglesCommand()
 ,_textureID(0)
 ,_glProgramState(nullptr)
 ,_blendType(BlendFunc::DISABLE)
+,_textureID1(0)
 {
     _type = RenderCommand::Type::TRIANGLES_COMMAND;
 }
 
-void TrianglesCommand::init(float globalOrder, GLuint textureID, GLProgramState* glProgramState, BlendFunc blendType, const Triangles& triangles,const Mat4& mv, uint32_t flags)
+void TrianglesCommand::init(float globalOrder, GLuint textureID, GLProgramState* glProgramState, BlendFunc blendType, const Triangles& triangles,const Mat4& mv, uint32_t flags, GLuint textureID1)
 {
     CCASSERT(glProgramState, "Invalid GLProgramState");
     CCASSERT(glProgramState->getVertexAttribsFlags() == 0, "No custom attributes are supported in QuadCommand");
@@ -59,6 +60,7 @@ void TrianglesCommand::init(float globalOrder, GLuint textureID, GLProgramState*
     if( _textureID != textureID || _blendType.src != blendType.src || _blendType.dst != blendType.dst || _glProgramState != glProgramState) {
         
         _textureID = textureID;
+        _textureID1 = textureID1;
         _blendType = blendType;
         _glProgramState = glProgramState;
         
@@ -95,6 +97,11 @@ void TrianglesCommand::useMaterial() const
 {
     //Set texture
     GL::bindTexture2D(_textureID);
+    
+    if (_textureID1 > 0)
+    { // x-studio365 spec, ANDROID ETC1 ALPHA supports.
+        GL::bindTexture2DN(1, _textureID1);
+    }
     
     //set blend mode
     GL::blendFunc(_blendType.src, _blendType.dst);

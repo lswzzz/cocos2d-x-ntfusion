@@ -156,7 +156,12 @@ public:
     @name Built Shader types
     @{
     */
-
+    
+    static const char* SHADER_NAME_ETC1AS_POSITION_TEXTURE_COLOR;
+    static const char* SHADER_NAME_ETC1AS_POSITION_TEXTURE_COLOR_NO_MVP;
+    static const char* SHADER_NAME_ETC1AS_POSITION_TEXTURE_GRAY;
+    static const char* SHADER_NAME_ETC1AS_POSITION_TEXTURE_GRAY_NO_MVP;
+    
     /**Built in shader for 2d. Support Position, Texture and Color vertex attribute.*/
     static const char* SHADER_NAME_POSITION_TEXTURE_COLOR;
     /**Built in shader for 2d. Support Position, Texture and Color vertex attribute, but without multiply vertex by MVP matrix.*/

@@ -100,6 +100,8 @@ public:
         UNKNOWN
     };
 
+    Format getFormat() const { return _fileType; }
+    
     /**
     @brief Load the image from the specified path.
     @param path   the absolute file path.

@@ -1548,6 +1548,10 @@ bool Image::initWithPVRv3Data(const unsigned char * data, ssize_t dataLen)
     // parse pixel format
     PVR3TexturePixelFormat pixelFormat = static_cast<PVR3TexturePixelFormat>(header->pixelFormat);
     
+    if(pixelFormat == PVR3TexturePixelFormat::ETC1){
+        _fileType = Format::ETC;
+    }
+    
     if (!testFormatForPvr3TCSupport(pixelFormat))
     {
         CCLOG("cocos2d: WARNING: Unsupported PVR Pixel Format: 0x%016llX. Re-encode it with a OpenGL pixel format variant",

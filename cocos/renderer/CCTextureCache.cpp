@@ -48,6 +48,8 @@ using namespace std;
 
 NS_CC_BEGIN
 
+static std::string s_etc1_alpha_endix = "@";
+
 // implementation TextureCache
 
 TextureCache * TextureCache::getInstance()
@@ -98,6 +100,7 @@ public:
     std::string filename;
     std::function<void(Texture2D*)> callback;
     Image image;
+    Image imageAlpha;
     bool loadSuccess;
 };
 
@@ -232,6 +235,14 @@ void TextureCache::loadImage()
         // load image
         asyncStruct->loadSuccess = asyncStruct->image.initWithImageFileThreadSafe(asyncStruct->filename);
 
+        if (asyncStruct->loadSuccess) { // check whether alpha texture exists & load it
+            if (asyncStruct->image.getFormat() == Image::Format::ETC) {
+                auto alphaFile = asyncStruct->filename + s_etc1_alpha_endix;
+                if (FileUtils::getInstance()->isFileExist(alphaFile))
+                    asyncStruct->imageAlpha.initWithImageFileThreadSafe(alphaFile);
+            }
+        }
+        
         // push the asyncStruct to response queue
         _responseMutex.lock();
         _responseQueue.push_back(asyncStruct);
@@ -292,6 +303,14 @@ void TextureCache::addImageAsyncCallBack(float dt)
                 texture->retain();
                 
                 texture->autorelease();
+                
+                if (asyncStruct->imageAlpha.getFormat() == Image::Format::ETC) {
+                    auto alphaTexture = new Texture2D();
+                    alphaTexture->initWithImage(&asyncStruct->imageAlpha);
+                    texture->setAlphaTexture(alphaTexture);
+                    alphaTexture->release();
+                }
+                
             } else {
                 texture = nullptr;
                 CCLOG("cocos2d: failed to call TextureCache::addImageAsync(%s)", asyncStruct->filename.c_str());
@@ -354,6 +373,19 @@ Texture2D * TextureCache::addImage(const std::string &path)
                 // texture already retained, no need to re-retain it
                 _textures.insert( std::make_pair(fullpath, texture) );
 
+                std::string alphaFullPath = path + s_etc1_alpha_endix;
+                if (texture->isETC1() && FileUtils::getInstance()->isFileExist(alphaFullPath)) {
+                    Image alphaImage;
+                    bRet = alphaImage.initWithImageFile(alphaFullPath);
+                    if (bRet != false)
+                    {
+                        Texture2D *pAlphaTexture = new Texture2D;
+                        pAlphaTexture->autorelease();
+                        pAlphaTexture->initWithImage(&alphaImage);
+                        texture->setAlphaTexture(pAlphaTexture);
+                    }
+                }
+                
                 //parse 9-patch info
                 this->parseNinePatchImage(image, texture, path);
             }

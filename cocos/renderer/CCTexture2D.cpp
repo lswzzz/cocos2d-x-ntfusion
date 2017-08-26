@@ -437,6 +437,7 @@ Texture2D::Texture2D()
 , _antialiasEnabled(true)
 , _ninePatchInfo(nullptr)
 , _valid(true)
+, _alphaTexture(nullptr)
 {
 }
 
@@ -445,7 +446,12 @@ Texture2D::~Texture2D()
 #if CC_ENABLE_CACHE_TEXTURE_DATA
     VolatileTextureMgr::removeTexture(this);
 #endif
-
+    if (_alphaTexture != nullptr)
+    { // x-studio365 spec, ANDROID ETC1 ALPHA supports.
+        _alphaTexture->release();
+        _alphaTexture = nullptr;
+    }
+    
     CCLOGINFO("deallocing Texture2D: %p - id=%u", this, _name);
     CC_SAFE_RELEASE(_shaderProgram);
 
@@ -741,6 +747,8 @@ bool Texture2D::initWithImage(Image *image, PixelFormat format)
         return false;
     }
 
+    _isETC1 = image->getFormat() == Image::Format::ETC;
+    
     unsigned char*   tempData = image->getData();
     Size             imageSize = Size((float)imageWidth, (float)imageHeight);
     PixelFormat      pixelFormat = ((PixelFormat::NONE == format) || (PixelFormat::AUTO == format)) ? image->getRenderFormat() : format;
@@ -1442,6 +1450,20 @@ void Texture2D::removeSpriteFrameCapInset(SpriteFrame* spriteFrame)
             capInsetMap.erase(spriteFrame);
         }
     }
+}
+
+void Texture2D::setAlphaTexture(Texture2D* alphaTex)
+{
+    if (alphaTex != nullptr) {
+        this->_alphaTexture = alphaTex;
+        this->_alphaTexture->retain();
+        this->_hasPremultipliedAlpha = true; // PremultipliedAlpha shoud be true.
+    }
+}
+
+GLuint Texture2D::getAlphaName() const
+{
+    return _alphaTexture == nullptr ? 0 : _alphaTexture->getName();
 }
 
 NS_CC_END

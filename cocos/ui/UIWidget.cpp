@@ -25,6 +25,7 @@ THE SOFTWARE.
 #include "ui/UIWidget.h"
 #include "ui/UILayout.h"
 #include "ui/UIHelper.h"
+#include "ui/UIScale9Sprite.h"
 #include "base/CCEventListenerTouch.h"
 #include "base/CCEventListenerKeyboard.h"
 #include "base/CCDirector.h"
@@ -35,6 +36,7 @@ THE SOFTWARE.
 #include "renderer/CCGLProgramState.h"
 #include "renderer/ccShaders.h"
 #include "2d/CCCamera.h"
+#include "2d/CCSprite.h"
 
 NS_CC_BEGIN
 
@@ -1198,7 +1200,19 @@ void Widget::copyClonedWidgetChildren(Widget* model)
 GLProgramState* Widget::getNormalGLProgramState()const
 {
     GLProgramState *glState = nullptr;
-    glState = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP);
+//    glState = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP);
+//    return glState;
+    auto virtualRender = const_cast<Widget*>(this)->getVirtualRenderer();
+    Texture2D* virtualTexture = nullptr;
+    if (auto sp = dynamic_cast<cocos2d::Sprite*>(virtualRender))
+    {
+        virtualTexture = sp->getTexture();
+    }
+    else if (auto scale9sp = dynamic_cast<Scale9Sprite*>(virtualRender))
+    {
+        virtualTexture = scale9sp->getSprite() != nullptr ? scale9sp->getSprite()->getTexture() : nullptr;
+    }
+    glState = GLProgramState::getPositionTextureColorGLProgramState(virtualTexture, true); // GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_GRAYSCALE);
     return glState;
 }
 

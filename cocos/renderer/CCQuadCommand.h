@@ -59,7 +59,7 @@ public:
      @param flags to indicate that the command is using 3D rendering or not.
      */
     void init(float globalOrder, GLuint textureID, GLProgramState* shader, const BlendFunc& blendType, V3F_C4B_T2F_Quad* quads, ssize_t quadCount,
-              const Mat4& mv, uint32_t flags);
+              const Mat4& mv, uint32_t flags, GLuint textureID1 = 0);
 
     /**Deprecated function, the params is similar as the upper init function, with flags equals 0.*/
     CC_DEPRECATED_ATTRIBUTE void init(float globalOrder, GLuint textureID, GLProgramState* shader, const BlendFunc& blendType, V3F_C4B_T2F_Quad* quads, ssize_t quadCount,
@@ -99,6 +99,8 @@ protected:
     ssize_t _quadsCount;
     /**Model view matrix when rendering the triangles.*/
     Mat4 _mv;
+    
+    GLuint _textureID1; // x-studio365 spec, ANDROID ETC1 ALPHA supports.
 };
 
 NS_CC_END
