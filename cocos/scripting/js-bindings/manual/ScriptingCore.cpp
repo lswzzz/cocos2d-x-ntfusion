@@ -622,7 +622,7 @@ void ScriptingCore::createGlobalContext() {
 //    JS_SetVersion(this->_cx, JSVERSION_LATEST);
     
     JS_SetErrorReporter(_cx, ScriptingCore::reportError);
-#if defined(JS_GC_ZEAL)
+#if defined(JS_GC_ZEAL) && defined(DEBUG)
     JS_SetGCZeal(_cx, 2, JS_DEFAULT_ZEAL_FREQ);
 #endif
 
@@ -2160,7 +2160,7 @@ void jsb_ref_finalize(JSFreeOp* fop, JSObject* obj)
         CCLOG("jsb_ref_finalize: BUG: proxy not found for %p (%s)", obj, JS_GetClass(obj)->name);
     }
 #else
-    CCLOG("jsb_ref_finalize: JSObject address = %p", obj);
+//    CCLOG("jsb_ref_finalize: JSObject address = %p", obj);
 #endif
 }
 
