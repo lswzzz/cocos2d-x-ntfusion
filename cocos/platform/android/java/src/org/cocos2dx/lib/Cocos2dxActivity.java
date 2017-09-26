@@ -258,6 +258,16 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (!isTaskRoot()) {
+             // Android launched another instance of the root activity into an existing task
+             //  so just quietly finish and go away, dropping the user back into the activity
+             //  at the top of the stack (ie: the last state of this task)
+             finish();
+             Log.w(TAG, "[Workaround] Ignore the activity started from icon!");
+             return;
+        }
+
         CocosPlayClient.init(this, false);
 
         onLoadNativeLibraries();
