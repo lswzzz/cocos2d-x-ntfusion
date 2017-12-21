@@ -128,6 +128,15 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
     return [self initWithFrame:frame pixelFormat:format depthFormat:0 preserveBackbuffer:NO sharegroup:nil multiSampling:NO numberOfSamples:0];
 }
 
+- (id) initOriginalRect:(CGRect) frame
+{
+    originalRect_ = frame;
+    if (frame.size.width < frame.size.height) {
+        originalRect_ = CGRectMake(frame.origin.x, frame.origin.y, frame.size.height, frame.size.width);
+    }
+    return nil;
+}
+
 - (id) initWithFrame:(CGRect)frame pixelFormat:(NSString*)format depthFormat:(GLuint)depth preserveBackbuffer:(BOOL)retained sharegroup:(EAGLSharegroup*)sharegroup multiSampling:(BOOL)sampling numberOfSamples:(unsigned int)nSamples;
 {
     if((self = [super initWithFrame:frame]))
@@ -144,11 +153,7 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
             return nil;
         }
 
-
-        originalRect_ = self.frame;
-        if (self.frame.size.width < self.frame.size.height) {
-            originalRect_ = CGRectMake(self.frame.origin.x, self.frame.origin.y, self.frame.size.height, self.frame.size.width);
-        }
+        [self initOriginalRect:self.frame];
         self.keyboardShowNotification = nil;
         
         if ([self respondsToSelector:@selector(setContentScaleFactor:)])
@@ -159,6 +164,7 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
     
     return self;
 }
+
 
 -(id) initWithCoder:(NSCoder *)aDecoder
 {

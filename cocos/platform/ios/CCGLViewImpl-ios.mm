@@ -33,6 +33,7 @@
 #include "CCGLViewImpl-ios.h"
 #include "CCSet.h"
 #include "base/CCTouch.h"
+#include "base/CCDirector.h"
 
 NS_CC_BEGIN
 
@@ -223,6 +224,41 @@ void GLViewImpl::setIMEKeyboardState(bool open)
     {
         [eaglview resignFirstResponder];
     }
+}
+
+Rect GLViewImpl::getSafeAreaRect() const
+{
+    CCEAGLView *eaglview = (CCEAGLView*) _eaglview;
+    
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 110000
+    float version = [[UIDevice currentDevice].systemVersion floatValue];
+    if (version >= 11.0f)
+    {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpartial-availability"
+        UIEdgeInsets safeAreaInsets = eaglview.safeAreaInsets;
+#pragma clang diagnostic pop
+        CGRect frame = eaglview.frame;
+        float scale = _designResolutionSize.height / frame.size.height;
+        Vec2 original = Vec2(safeAreaInsets.left, 0);
+        Vec2 size = Vec2(frame.size.width-safeAreaInsets.left-safeAreaInsets.right, frame.size.height);
+        
+        // Convert a point from UI coordinates to which in design resolution coordinate.
+//        leftBottom.x = (leftBottom.x - _viewPortRect.origin.x) / _scaleX,
+//        leftBottom.y = (leftBottom.y - _viewPortRect.origin.y) / _scaleY;
+//        rightTop.x = (rightTop.x - _viewPortRect.origin.x) / _scaleX,
+//        rightTop.y = (rightTop.y - _viewPortRect.origin.y) / _scaleY;
+        original.x = original.x * scale,
+        original.y = original.y * scale;
+        size.x = size.x * scale,
+        size.y = size.y * scale;
+        
+        return Rect(original.x, original.y, size.x, size.y);
+    }
+#endif
+    
+    // If running on iOS devices lower than 11.0, return visiable rect instead.
+    return GLView::getSafeAreaRect();
 }
 
 NS_CC_END

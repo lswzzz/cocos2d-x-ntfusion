@@ -2331,6 +2331,16 @@ bool
 },
 
 /**
+ * @method getSafeAreaRect
+ * @return {rect_object}
+ */
+getSafeAreaRect : function (
+)
+{
+    return cc.Rect;
+},
+
+/**
  * @method setScissorInPoints
  * @param {float} arg0
  * @param {float} arg1
@@ -2647,6 +2657,16 @@ getWinSizeInPixels : function (
 )
 {
     return cc.Size;
+},
+
+/**
+ * @method getSafeAreaRect
+ * @return {rect_object}
+ */
+getSafeAreaRect : function (
+)
+{
+    return cc.Rect;
 },
 
 /**
